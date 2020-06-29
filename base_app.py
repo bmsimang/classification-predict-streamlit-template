@@ -64,12 +64,12 @@ raw = pd.read_csv("resources/train.csv")
 labels_dict = {-1: 'Agnostic',0: 'Neutral',1: 'Believer',2: 'News'}
 raw.replace({'sentiment': labels_dict}, inplace=True)
 
-# Models used
+### Models used
 
 models = ['Linear SVC' , 'Logistic Regression','Random Forest']
 
-# EDA functions
-# Document Corpus
+### EDA functions
+### Document Corpus
 raw_corpus = [statement.lower() for statement in raw.message]
 def cleaning_fun(tweet):
     """This function takes a tweet and extracts important text"""
@@ -124,7 +124,7 @@ def word_count(df,Corpus,len1):
     return(word_count_plt.figure)
 @st.cache(show_spinner=False)
 
-## Word Cloud
+#   Word Cloud
 def word_cloud(input_df,Corpus):
     """Function output the wordcloud of a class given
        a dataframe with a sentiment column and a corpus"""
@@ -148,17 +148,16 @@ def main():
 	<h2 style="color:green;text-align:center;">PLANET DATA TWEET CLASSIFIER</h2>
 	</div>
     
-    """
-    
+    """  
     st.markdown(html_temp,unsafe_allow_html=True)
     
     # Creating sidebar 
-    
-    options = ['Information','Analyse Tweet','View Raw Data', 'Top words EDA','View Twitter Hashtags',]
+
+    options = ['Information','Analyse Tweet','View Raw Data', 'Top words EDA',]
     selection = st.sidebar.selectbox(label="Choose Tab", options=options)
-                                    
-                                    
-    # Build Welcome page
+
+
+    # Info page  
     
     if selection == 'Information' :
         st.subheader("About")
@@ -167,10 +166,11 @@ def main():
                     'orgarnistion achieve sustainable growth. The Twitter sentiment analysis allows you '\
                     'to maintain guided business practices which will in turn assist identify niches in the market '\
                     'through streamlined marketing compaigns for your target audience.')
-    ## EDA
     
-    if selection == 'Top words EDA' :
-        ##st.subheader("Top words visualiser with a word coud functionality")
+    # EDA 
+
+    if selection == 'Top words EDA':
+        st.subheader("Classify the top word from each class and generate a wordcloud")
         empty_df = pd.DataFrame()
         classes = st.multiselect('Which classes would you like to view?',['Agnostic', 'Neutral', 'News', 'Believer'])
         for sentiment in classes:
@@ -188,18 +188,14 @@ def main():
                 st.warning('Please choose and option')
             if len(classes) > 0:
                 st.write(word_cloud(empty_df,clean_corpus))
-    
-    # Build Tweet analyser page
+
+    # Tweet analyser page
     
     if selection == "Analyse Tweet":
         st.subheader("Sentiment translation based on an individual's tweet")
-        
-        # Creating a text box for user input
         tweet_text = st.text_area("Input Tweet")
         tweet_text = cleaning_fun(tweet_text)
         vect_text = count_vec.transform([tweet_text]).toarray()
-        
-        
         model_list = st.selectbox('Classification model  ' , models)
 
         if model_list == 'Linear SVC' :
@@ -216,44 +212,18 @@ def main():
             # vect_text = [tweet_text]
             prediction = picked_model.predict(vect_text)
             st.success(f'Tweet is : {prediction[0]}')
-              
 
-    if selection == "View Twitter Hashtags":
-        st.subheader('Green Speak Agnostic Hashtags')
-        num_hash = st.slider('Drag the slider' , 1, 20 )
-        if st.button("Show"):           
-            rand_hash = random.sample(agnostic,num_hash) 
-            for i in range(len(rand_hash)):                
-                st.success(rand_hash[i])
-
-
+    # Raw data & csv upload
     if selection == "View Raw Data":
         st.subheader("Raw Twitter data with labels")
         st.markdown('''Take a look at the the raw data that is used to train whichever model you choose to use to predict the sentiment''')
         if st.checkbox('Show raw data'):
             st.write(raw[['sentiment', 'message']])
             st.markdown('''The sentiment classification is defined as as follows''')
-
         uploaded_file = st.file_uploader("Choose a CSV file", type="csv")
         if uploaded_file is not None:
             data = pd.read_csv(uploaded_file)
             st.write(data[['message']])
-    
-# Popular Hashtags
-
-agnostic = ['#Climate','#globalwarming','endangered','#Trump', '#climatechange',
-            '#ClimateVoter','#Iamwithher','#SaveOurOcean','#Africa',
-            '#ParisAgreement','#ActOnClimate','#globalwarming', '#Climatechange',
-            '#BeforetheFlood','#sustainability','#science','#ClimateCounts','#ClimateAction','#sea',
-            '#EarthDay','#EarthToMarrakech','#EPA','#ClimateChangeIsReal', '#deforestation'
-            '#EarthHour','#Women4Climate','#ClimateMarch','#Africa','#climatemarch',
-            '#Cities4Climate','#actonclimate','#itstimetochange','#SDGs','#CleanPowerPlan',
-            '#SaveTheEPA','#vegan','#WhyIMarch','#WorldVeganDay',
-            '#health','#ClimateFacts','#StandUp','#ClimateofHope','#GreenSummit','#ThursdayThoughts',
-            '#cleanenergy','#showthelove','#MyClimateAction',
-            '#NatGeo','#beforetheflood','#G20','#QandA','#green','#eco',
-            '#GreenNewDeal','#UniteBlue','#MarchForScience','#SDG13','#WEF','#Analytics',
-            ]
 
 # Required to let Streamlit instantiate our web app.  
 if __name__ == '__main__':
